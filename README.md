@@ -108,6 +108,7 @@
 
 - 프로그램 흐름에 대해 취상위 시작 지점을 포함하는 것을 나타내기 위해 구조체, 클래스 또는 열거형 선언에 이 속성을 적용할 수 있는데 타입은 인수가 없고 Void를 반환하는 main 타입 함수를 제공해야한다고 한다.
 
+
 # Concurrency
 
 ## 동시성 프로그래밍이란?
@@ -205,3 +206,104 @@ serialQueue.async {
     - resume - 일시 중단된 비동기 함수 B를 다시 실행하는 단계
     - 종료 - B함수가 종료되면 A함수에게 Threads 제어권을 반납
 
+
+# Generic
+
+## Generic이란?
+
+- 제네릭이란 타입에 의존하지 않는 범용 코드를 작성할 때 사용하는 것
+- 제네릭으로 구현한 기능과 타입은 재사용하기 쉽고, 코드의 중복을 줄일 수 있음
+- 만약 제네릭의 개념이 없다면 타입에 따른 함수를 모든 경우마다 다시 정의해야하는 불편함이 있음
+- 애플에서는 Swift에서 가장 강력한 기능 중 하나로 제네릭을 말하며 Swift 표준 라이브러리의 대다수가 제네릭으로 선언되있다고 함
+
+## 제네릭 함수
+
+- 제네릭 함수가 없다면?!
+
+```swift
+func swapTwoInts(_ a: inout Int, _ b: inout Int) {
+	let tempA = a
+	a = b
+	b = tempA
+}
+
+func swapTwoDoubles(_ a: inout Double, _ b: inout Double) {
+	let tempA = a
+	a = b
+	b = tempA
+}
+
+func swapTwoString(_ a: inout String, _ b: inout String) {
+	let tempA = a
+	a = b
+	b = tempA
+}
+
+// => 위 3개의 코드 모두 a, b를 swap 해주는 동일한 동작의 코드이지만 타입이 다르기 때문에 하나하나 정의해줘야한다.
+```
+
+- 제네릭 함수를 사용한다면?!
+
+```swift
+func swapTwoValues<T>(_ a: inout T, _ b: inout T) {    // 플레이스홀더 역할(표시 역할) < > 안의 타입과 파라미터의 타입은 같아야함
+	let tempA = a
+	a = b
+	b = tempA
+}
+
+// => 타입 파라미터<T>는 함수 내부에서 파라미터의 타입이나 리턴형으로 사용
+// => 이렇게 단 하나의 함수로 위의 3개의 함수뿐만 아니라 동일한 기능이 필요한 모든 타입에서 사용이 가능
+
+var string1 = "hello"
+var string2 = "world"
+
+var double1 = 0.33
+var double2 = 0.77
+
+swapTwoValues(&string1, &string2)
+swapTwoValues(&double1, &double2)
+
+// => 위의 제네릭 함수에서 두 파라미터의 타입이 같기 때문에 사용할 때도 두 아규먼트의 타입이 같다면 어떤 타입도 상관없음
+// => 함수 파라미터에 inout은 입출력 파라미터를 위해 사용, 호출할 때는 &를 아규먼트 앞에 붙여서 사용
+```
+
+## 제네릭 타입
+
+- 생각보다 우리는 Swift에서 많은 제네릭 타입을 접하게 된다. (배열, 딕셔너리, 옵셔널, 고차함수 등등)
+
+```swift
+let arr: Array<String> = ["apple", "academy"] // => let arr: [String] = ["apple", "academy"]
+let dic: Dictionary<String, Int> = ["zerom": 1, "toughie": 2] // => let dic: [String: Int] = ["zerom": 1, "toughie": 2]
+let optionalType: Optional<String> // => let optionalType: String?
+```
+
+- 제네릭 타입(클래스, 구조체, 열거형)의 작성
+
+```swift
+class SomeColor<T> {
+	var red: T
+	var green: T
+	var blue: T
+}
+
+extension SomeColor {
+	func getColor() -> T {
+		// 동작 코드
+	}
+}
+```
+
+## 제네릭의 타입 제약
+
+- 프로토콜 제약 → 타입 파라미터에 프로토콜을 적용시킬수도 있음
+
+```swift
+func findIndex<T: Equatable>(item: T, array: [T]) -> Int? {
+	for (index, value) in array.enumerated() {
+		if item == value {
+			return index
+		}
+	}
+	return nil
+}
+```
