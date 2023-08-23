@@ -1,3 +1,71 @@
+# Swift에 대한 여러가지 궁금증
+
+## class 앞에 final을 붙였을 때 어떤 점이 좋을까?
+
+- 해당 클래스가 더이상 상속이 필요없거나 서브클래스에서 특정 method, property, subscript가 오버라이드 되지 않아야 할 때 사용
+- final을 붙인 method, property, subscript를 서브클래스에서 오버라이드하거나 final class에 서브클래스를 만드려고 하면 컴파일 타임 에러가 발생
+- 런타임 성능 향상
+    - Static Dispatch (Direct Call) - 컴파일 타임에 실제 호출할 함수를 결정하는 방식으로 함수 호출이 간단하고 속도가 빠름. Value type인 구조체와 열거형은 기본적으로 오버라이딩 되지 않기 때문에 Static Dispatch를 사용
+    - Dynamic Dispatch (Indirect Call) - 런타임에 호출될 함수를 결정하는 방식으로 함수 호출 과정에서 실제 참조할 요소를 찾는 과정이 있어서 Static에 비해 속도가 느림. 클래스마다 함수 포인터들의 배열인 vtable(Virtual Dispatch Table)을 갖고 있는데 이를 참조해서 실제 호출할 함수를 결정함
+    - Swift에서 클래스는 일반적으로 Dynamic Dispatch 방식을 이용해서 런타임에 어떤 메소드를 호출할지 결정하는데 만약 오버라이드가 필요없다면 굳이 느린 Dynamic Dispatch 방식을 사용할 필요가 없기 때문에 final 키워드를 붙인 method는 Static Dispatch를 사용해 컴파일 타임에 호출할 method를 지정하기 때문에 런타임 성능이 향상됨
+
+## Diesignated init(지정 생성자), convenience init(편의 생성자), required init(필수 생성자)
+
+- Diesignated init은 초기화 이니셜라이저로 클래스의 모든 프로퍼티가 초기화 될 수 있도록 해주고 평소에 init으로 사용함
+- convenience init은 Diesignated init을 보조하는 역할, 그래서 convenience init은 같은 클래스에서 다른 이니셜라이저를 호출해야됨
+- convenience init은 클래스의 init이 모든 프로퍼티를 전달받지 않는 상황이거나 일부 프로퍼티만 정해서 초기화 해주고 싶을 때 사용
+- 예를 들어 음식점 메뉴 클래스에 이름과 가격이 프로퍼티가 있고 이름은 정해진 상황이지만 가격이 정해지지 않았을 때 사용할 수 있음
+- required init은 필수 이니셜라이저로 해당 클래스를 상속받은 자식 클래스에서 반드시 해당 이니셜라이저를 구현해줘야함(상속받을 때 반드시 재정의 해줘야 하는 이니셜라이저에 사용)
+- 자식 클래스에서 필수 이니셜라이저를 재정의 할 때에는 override 수식어 대신 required 수식어를 사용
+
+## deinit은 어떻게 동작하는가?
+
+- 인스턴스가 메모리에서 해제되기 직전에 호출되고 클래스 인스턴스와 관련하여 원하는 정리작업을 구현할 수 있음
+- deinit은 클래스에서만 사용 가능
+- Swift는 특정 클래스 인스턴스가 더이상 필요 없어질 때 메모리 공간을 확보하기 위해 자동적으로 메모리를 해제함(ARC 방식)
+- 하지만 필요에 따라 직접 메모리를 관리해줄 필요가 있을 수 있기 대문에 클래스 내부에서 최대 한개까지 deinit 구현이 가능하다.
+
+## 앱이 꺼지기 직전에 꺼지는 것을 감지해서 메서드를 실행시킬 수 있는가?
+
+- SwiftUI에서 scenePhase를 받아와서 App의 WindowGroup에 onChange로 앱 상태의 변화를 감지하고 실행시키는 방법 - 간편함
+- AppDelegate와 SceneDelegate를 만들어서 life cycle을 감지하고 sceneWillResignActive(_:)를 사용해서 앱이 백그라운드로 이동하기 직전에 메서드를 호출하는 방법 - 복잡하지만 조금 더 다양한 상황에 사용할 수 있음
+
+## 가끔 보이는 앞에 #이 붙은 친구들은 뭐하는 친구들일까?
+
+- 음… 이 부분은 블로그가 정리가 잘 되어있으니 참고하도록 하자…
+
+[[Swift] Special Literal 알아보기](https://sujinnaljin.medium.com/swift-special-literal-알아보기-5120f9596424)
+
+[[Swift] #로 시작하는 키워드 알아보기](https://sujinnaljin.medium.com/swift-로-시작하는-키워드-알아보기-60467fcedb96)
+
+### 여러가지 아키텍쳐 패턴들의 장단점은 무엇이며 어떨때 사용하면 좋을까?
+
+### 우리가 자주 쓰는 Identifiable, Hashable, Equatable 프로토콜은 정확히 무엇일까?
+
+### State, binding을 써야할때와 Observerble을 써야할때는 어떤 기준으로 판단해야될까?
+
+- @State
+    - SwiftUI에서 View는 구조체 타입이고 화면을 그려주는 실질적인 뷰는 body변수에서 동작하는데 body변수는 get-only여서 View의 내용을 수정할 수 없음
+    - View가 구조체 타입이기 때문에 참조를 가지고 있지 않아서 변경사항을 적용해서 그려주려면 원래 View에 추가하는 방식이 아닌 View를 새로 그려주는 방식이 필요하지만 결과적으로 새로 그려주려고 해도 결국 변경사항을 적용해야하기 때문에 이럴 때 @State를 이용할 수 있음
+    - @State로 선언된 변수의 값이 변할 때 View를 다시 계산해서 그려줌
+    - @State 변수는 View의 body에서만 접근해야하며 private 선언으로 외부에서 접근하는 것을 방지하는 것을 권장
+    - @State 변수는 Heap에 할당되고 View에는 포인터가 존재해서 View가 새로 만들어지면 포인터를 새로운 뷰로 옮겨서 힙의 같은 메모리를 가르키는 방식으로 View의 상태를 저장하고 변경함
+- @Binding
+
+## Some, Any 키워드는 정확하게 무엇일까?
+
+## 강한 참조, 순환 참조는 정확하게 무엇이고 왜 고려해야될까?
+
+## Swift가 가지는 강점에는 어떤것이 있을까?
+
+## 의존성이란 무엇인가?
+
+## defer란 무엇이며 어떨 때 사용하는가?
+
+## static 키워드는 무엇일까?
+
+
+
 # Attributes
 
 ## Attributes(속성)이란?
