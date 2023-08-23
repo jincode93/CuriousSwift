@@ -38,11 +38,11 @@
 
 [[Swift] #로 시작하는 키워드 알아보기](https://sujinnaljin.medium.com/swift-로-시작하는-키워드-알아보기-60467fcedb96)
 
-### 여러가지 아키텍쳐 패턴들의 장단점은 무엇이며 어떨때 사용하면 좋을까?
+## 여러가지 아키텍쳐 패턴들의 장단점은 무엇이며 어떨때 사용하면 좋을까?
 
-### 우리가 자주 쓰는 Identifiable, Hashable, Equatable 프로토콜은 정확히 무엇일까?
+## 우리가 자주 쓰는 Identifiable, Hashable, Equatable 프로토콜은 정확히 무엇일까?
 
-### State, binding을 써야할때와 Observerble을 써야할때는 어떤 기준으로 판단해야될까?
+## State, binding을 써야할때와 Observerble을 써야할때는 어떤 기준으로 판단해야될까?
 
 - @State
     - SwiftUI에서 View는 구조체 타입이고 화면을 그려주는 실질적인 뷰는 body변수에서 동작하는데 body변수는 get-only여서 View의 내용을 수정할 수 없음
@@ -63,7 +63,6 @@
 ## defer란 무엇이며 어떨 때 사용하는가?
 
 ## static 키워드는 무엇일까?
-
 
 
 # Attributes
