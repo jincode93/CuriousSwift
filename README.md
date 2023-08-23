@@ -107,3 +107,101 @@
 ### @main
 
 - 프로그램 흐름에 대해 취상위 시작 지점을 포함하는 것을 나타내기 위해 구조체, 클래스 또는 열거형 선언에 이 속성을 적용할 수 있는데 타입은 인수가 없고 Void를 반환하는 main 타입 함수를 제공해야한다고 한다.
+
+# Concurrency
+
+## 동시성 프로그래밍이란?
+
+- 동시성 프로그래밍이란 서로 다른 Task를 Main Threads가 아닌 다른 Threads에서 분산처리할 수 있도록 해주는 것
+- iOS에서는 Task를 Queue로 보내기만 하면 OS가 알아서 다른 Threads에서 작업함 → 직접적으로 Threads를 관리하는 개념이 아닌 Queue를 이용해서 작업을 분산처리하고 OS에서 알아서 Threads 숫자를 관리
+
+## 동시성 프로그래밍을 하는 이유
+
+- 작업 시간이 긴 여러가지 Task를 하나의 Threads에서 처리하려면 과부하가 생기기 때문에 Main Threads 외의 Threads를 이용해서 분산해줌으로써 부하를 나누기 위해 사용 (네트워크 통신 등)
+- 성능, 반응성, 최적화와 관련 버벅거리는 것을 해결하기 위해 사용
+
+## 병렬(Parallel) VS 동시성(Concurrency)
+
+- 물리적은 Threads와 소프트웨어적인 Threads의 개념은 서로 다름
+- 병렬은 물리적인 Threads에서 실제 동시에 일을 하는 개념 - 내부적으로 알아서 동작함
+- 동시성은 Main Threads가 아닌 다른 소프트웨어적인 Threads에서 동시에 일을 하는 개념
+
+## 직렬(Serial) vs 동시(Concurrent)의 개념
+
+- 직렬큐는 분산처리 시킨 Task를 한개의 Threads로만 보내서 Task를 처리
+
+```swift
+let serialQueue = DispatchQueue(label: “문자열”)
+
+serialQueue.async {
+	task1()
+}
+
+serialQueue.async {
+	task2()
+}
+
+// => 직렬큐이기 때문에 순서대로 실행
+```
+
+- 동시큐는 분산처리 시킨 Task를 여러개의 Threads로 보내서 Task를 처리
+
+```swift
+let concurrentQueue = DispatchQueue.global()
+
+serialQueue.async {
+	task1()
+}
+
+serialQueue.async {
+	task2()
+}
+
+// => 동시큐이기 때문에 순서가 랜덤하게 실행
+```
+
+- 직렬큐는 순서가 중요한 작업을 처리할 때 사용하고 동시큐는 각자 독립적이지만 유사한 여러개의 작업을 처리할 때 사용
+
+## DispatchQueue(GCD)의 종류
+
+- (글로벌) 메인큐 - DispatchQueue.main : Main Threads를 사용, 직렬큐
+- 글로벌큐 - DispatchQueue.global() : 종류가 여러개, 기본 설정은 동시큐 - 여러개의 Threads 사용, QoS(큐의 서비스 품질)에 따라 Threads의 수를 조절해서 중요한 Task일수록 작업을 빨리 끝내도록 해줄 수 있음(다만 많은 Threads를 쓴다고 꼭 먼저 끝나는건 아님)
+- 프라이빗(Custom)큐 - DispatchQueue(label: “…”) : 커스텀으로 만드는 큐, 기본적으로는 직렬큐 - 하나의 Threads 사용
+
+## GCD 주의사항
+
+- 화면(UI)와 관련된 Task는 반드시 Main Threads로 보내줘야됨
+
+## 비동기(Async)처리란?
+
+- Task를 다른 Threads에서 하도록 시킨 후, Task가 끝날 때 까지 기다리지 않고 다음 Task를 진행하는 것
+
+## 동기(Sync)처리란?
+
+- Task를 다른 Threads에서 하도록 시킨 후, Task가 끝날 때 까지 기다렸다가 다음 Task를 진행하는 것
+- 동시성 프로그래밍에서는 동기 처리를 거의 따로 해줄 필요는 없음
+
+## 올바른 비동기함수 설계
+
+- 다른 Threads에서 task를 처리할 때 task를 시작하고 바로 return을 보내기 때문에 return을 반환하는 함수 형태로 사용하면 안됨(항상 return이 nil로 나올 가능성이 높음) → 올바른 콜백함수를 만들기 위해서 completion handler를 사용할 수 있음
+- 객체 내에서 비동기코드를 사용할 때 self 키워드에 접근해야 할 때 캡처리스트 안에서 weak self로 선언하지 않으면 강한 참조가 발생하는데 이때 서로를 가리키는 경우라면 retain cycle(참조 사이클)이 발생해 메모리 누수가 발생할 수 있고 그렇지 않더라도 클로저의 수명주기가 길어지는 현상이 발생할 수 있음 → 캡처리스트 안에서 weak self로 선언하는 것을 권장 (약한 참조)
+- 다만 무분별한 weak self 사용은 런타임 오버헤드를 발생시킬 수 있고, nil을 체크해야되는 귀찮음을 발생
+
+## Async / await
+
+- @escaping 클로저를 활용한 비동기처리를 할 때 여러개의 비동기 함수를 이어서 사용해야할 때 클로저가 계속 늘어나서 보기 어려워짐(무한 들여쓰기, 콜백 지옥)
+- completion handler가 없어도 함수 자체를 return방식으로 설계를 하면서도 비동기 처리를 할 수 있게 됨 → 코드처리가 깔끔해짐
+- async : 비동기 함수임을 나타내는 키워드
+- await : async 키워드가 표시된 메소드나 함수의 리턴을 기다리게 하는 키워드
+- async 함수는 비동기적으로 동작할 수 있고, await 키워드를 사용해 비동기 함수의 결과를 대기할 수 있음
+- Sync에서의 Threads 관리
+    - 호출 - A함수에서 B함수(sync)를 호출하면, A함수가 실행되던 Threads의 제어권을 B에게 전달
+    - 진행 - B함수가 끝날때까지 해당 Threads는 점유되어 다른 일을 수행하지 않게 됨
+    - 종료 - B함수가 종료되면 A함수에게 다시 Threads 제어권을 반납
+- Async에서의 Threads 관리
+    - 호출 - A함수에서 B함수(async)를 호출하면, A함수가 Threads의 제어권을 B에게 전달
+    - 진행 - B함수는 Async이기 때문에 Threads의 제어권을 포기하는 suspend가 가능(suspend되면 호출한 A함수도 같이 suspend됨)
+    - suspend - Threads에 대한 제어권은 system으로 가고 시스템은 Threads를 사용하여 다른 작업을 수행
+    - resume - 일시 중단된 비동기 함수 B를 다시 실행하는 단계
+    - 종료 - B함수가 종료되면 A함수에게 Threads 제어권을 반납
+
