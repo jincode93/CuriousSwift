@@ -51,6 +51,9 @@
     - @State 변수는 View의 body에서만 접근해야하며 private 선언으로 외부에서 접근하는 것을 방지하는 것을 권장
     - @State 변수는 Heap에 할당되고 View에는 포인터가 존재해서 View가 새로 만들어지면 포인터를 새로운 뷰로 옮겨서 힙의 같은 메모리를 가르키는 방식으로 View의 상태를 저장하고 변경함
 - @Binding
+	- Binding은 View Struct 내부에서 생성되며 State로 생성된 프로퍼티를 참조해서 해당 값을 받아온다.
+- Observerble
+  - 
 
 ## Some, Any 키워드는 정확하게 무엇일까?
 
