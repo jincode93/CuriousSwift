@@ -51,9 +51,18 @@
     - @State 변수는 View의 body에서만 접근해야하며 private 선언으로 외부에서 접근하는 것을 방지하는 것을 권장
     - @State 변수는 Heap에 할당되고 View에는 포인터가 존재해서 View가 새로 만들어지면 포인터를 새로운 뷰로 옮겨서 힙의 같은 메모리를 가르키는 방식으로 View의 상태를 저장하고 변경함
 - @Binding
-	- Binding은 View Struct 내부에서 생성되며 State로 생성된 프로퍼티를 참조해서 해당 값을 받아온다.
-- Observerble
-  - 
+    - Binding은 View Struct 내부에서 생성되며 State로 생성된 프로퍼티를 참조해서 해당 값을 받아옴
+- ObserverbleObject & @Published
+    - ObserverbleObject는 필수구현이 필요하지 않은 프로토콜로써 Combine에 속한 기능
+    - ObserverbleObject를 준수한 클래스는 objectWillChange라는 프로퍼티를 사용할 수 있는데 objectWillChange.send()를 사용할 수 있고 이 send() 함수는 변경된 사항이 있으면 알려주는 역할을 함
+    - 가지고 있는 변수가 적으면 send()함수를 몇번 사용해서 간단하게 할 수 있지만 변수가 많아지고 수정되는 부분이 많아진다면 하나하나 신경쓰기 어려워지기 때문에 이러한 기능을 대신 해주는 것이 @Published 프로퍼티 래퍼임
+    - @Published를 사용하면 해당 프로퍼티가 변경되었을 때 자동으로 objectWillChange.send()를 호출해줌
+- @ObservedObject & @StateObject
+    - @ObservedObject는 ObservableObject 프로토콜을 준수하는 타입에 사용할 수 있음
+    - @StateObject는 @ObservedObject의 단점을 보완해서 iOS14에서 추가된 기능
+    - @ObservedObject는 View가 새로 그려질 때 새로 생성될 수 있음 (View의 라이프사이클에 의존)
+    - @StateObject는 View가 새로 그려질 때 @State와 비슷하게 새로 그려지지 않고 참조를 가지고 있어서 새로 생성되지 않음 (View의 라이프사이클에 의존하지 않음) -> source of truth 개념을 읽어보면 도움됨
+    - @StateObject는 새로 생성되는 개념이 아니다 보니 데이터 유실을 막을 수 있음
 
 ## Some, Any 키워드는 정확하게 무엇일까?
 
